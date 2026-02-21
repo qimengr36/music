@@ -28,11 +28,11 @@
             margin: 0 auto;
             background: white;
             padding: 15px;
-            padding-top: 130px; /* 给顶部固定区域留出空间 */
+            padding-top: 170px; /* 增加顶部内边距，为新增导航栏留出空间 */
             padding-bottom: 80px; /* 给底部分页栏留出空间 */
         }
 
-        /* 顶部固定区域：搜索栏 + 播放器 + 歌曲信息 */
+        /* 顶部固定区域：导航栏 + 搜索栏 + 播放器 + 歌曲信息 */
         .top-fixed {
             position: fixed;
             top: 0;
@@ -42,6 +42,32 @@
             z-index: 999;
             padding: 15px;
             border-bottom: 1px solid #eee;
+        }
+
+        /* 新增：导航栏样式 */
+        .nav-bar {
+            display: flex;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .nav-item {
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #666;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .nav-item.active {
+            color: #1677ff;
+            border-bottom-color: #1677ff;
+            font-weight: 500;
+        }
+
+        .nav-item:hover {
+            color: #1677ff;
         }
 
         /* 搜索区域 */
@@ -188,7 +214,7 @@
         /* 结果列表 */
         .result-list {
             margin-bottom: 20px;
-            max-height: calc(100vh - 220px);
+            max-height: calc(100vh - 260px); /* 调整最大高度，适配新增导航栏 */
             overflow-y: auto;
         }
 
@@ -430,8 +456,14 @@
 <body>
 
 <div class="container">
-    <!-- 顶部固定区域：搜索栏 + 歌曲信息 + 播放器 -->
+    <!-- 顶部固定区域：导航栏 + 搜索栏 + 歌曲信息 + 播放器 -->
     <div class="top-fixed">
+        <!-- 新增：导航栏 -->
+        <div class="nav-bar">
+            <div class="nav-item active" id="nav-music">音乐</div>
+            <div class="nav-item" id="nav-link_two">{$link_two.name}</div>
+        </div>
+
         <div class="search-area">
             <input type="text" id="search-input" placeholder="歌曲名/歌手名">
             <button id="search-btn">搜索</button>
@@ -495,6 +527,10 @@
     const nextPageBtn = document.getElementById('next-page');
     const pageInfo = document.getElementById('page-info');
     const jumpInput = document.getElementById('jump-input');
+
+    // 新增：导航栏元素
+    const navMusic = document.getElementById('nav-music');
+    const navLinkTwo = document.getElementById('nav-link_two');
 
     // 播放信息相关元素
     const playingInfo = document.getElementById('playing-info');
@@ -779,6 +815,18 @@
             btn.classList.remove('loading');
         }
     }));
+
+    // 新增：导航栏点击事件
+    navMusic.addEventListener('click', () => {
+        // 切换到音乐页面，保持当前状态
+        navMusic.classList.add('active');
+        navLinkTwo.classList.remove('active');
+    });
+
+    navLinkTwo.addEventListener('click', () => {
+        // 跳转
+        window.location.href = '{$link_two.link}';
+    });
 
     // 搜索请求
     async function performSearch() {
