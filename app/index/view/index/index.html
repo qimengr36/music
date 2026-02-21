@@ -54,15 +54,17 @@
         .nav-item {
             padding: 10px 20px;
             font-size: 16px;
-            color: #666;
+            color: #666; /* 未激活时统一为灰色 */
             cursor: pointer;
             border-bottom: 2px solid transparent;
             transition: all 0.3s;
+            flex: 1; /* 平分宽度，保持一致 */
+            text-align: center;
         }
 
         .nav-item.active {
-            color: #1677ff;
-            border-bottom-color: #1677ff;
+            color: #1677ff; /* 激活时为蓝色 */
+            border-bottom-color: #1677ff; /* 蓝色下划线 */
             font-weight: 500;
         }
 

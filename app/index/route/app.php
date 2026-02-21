@@ -15,3 +15,4 @@ Route::miss(function () {
 });
 
 Route::get('/', 'index/index');
+Route::get('/link_two', 'index/linkTwo');
