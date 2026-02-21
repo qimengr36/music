@@ -11,6 +11,8 @@
 use think\facade\Route;
 
 Route::miss(function () {
-    return '';
-//    return '404 Not Found!';
+//    return '';
+    return '404 Not Found!';
 });
+Route::get('/', 'index/index');
+Route::get('link_two', 'index/linkTwo');

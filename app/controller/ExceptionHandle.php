@@ -1,14 +1,14 @@
 <?php
 
-namespace app\index;
+namespace app\controller;
 
 use pmleb\exceptions\AuthException;
+use think\exception\Handle;
 use think\exception\HttpResponseException;
 use think\exception\ValidateException;
 use think\facade\Env;
 use think\facade\Log;
 use think\Response;
-use think\exception\Handle;
 use Throwable;
 
 class ExceptionHandle extends Handle

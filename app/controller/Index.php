@@ -1,9 +1,9 @@
 <?php
 
-namespace app\index\controller;
+namespace app\controller;
 
-use think\facade\View;
 use think\facade\Request;
+use think\facade\View;
 
 class Index
 {
