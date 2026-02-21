@@ -149,13 +149,16 @@
             justify-content: space-between;
             align-items: center;
         }
+
         .playing-info.active {
             display: flex;
         }
+
         .playing-text {
             flex: 1;
             overflow: hidden;
         }
+
         .playing-title {
             font-size: 15px;
             font-weight: 500;
@@ -165,6 +168,7 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
+
         .playing-singer {
             font-size: 12px;
             color: #666;
@@ -172,6 +176,7 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
+
         /* 播放信息区的下载按钮 */
         .playing-download {
             margin-left: 10px;
@@ -186,6 +191,7 @@
             cursor: pointer;
             font-size: 14px;
         }
+
         .playing-download.loading {
             background-color: #1677ff;
             pointer-events: none;
@@ -241,9 +247,11 @@
         audio::-webkit-media-controls-enclosure {
             overflow: hidden !important;
         }
+
         audio::-webkit-media-controls-download-button {
             display: none !important;
         }
+
         audio::-webkit-media-controls-fullscreen-button {
             display: none !important;
         }
@@ -254,8 +262,8 @@
             max-height: calc(100vh - 260px); /* 调整最大高度，适配新增导航栏 */
             overflow-y: auto;
             /* 隐藏滚动条 - 核心修改 */
-            -ms-overflow-style: none;  /* IE and Edge */
-            scrollbar-width: none;     /* Firefox */
+            -ms-overflow-style: none; /* IE and Edge */
+            scrollbar-width: none; /* Firefox */
         }
 
         /* 隐藏webkit内核浏览器滚动条 */
@@ -337,8 +345,12 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         .no-result, .error-tip {
@@ -347,8 +359,13 @@
             font-size: 14px;
         }
 
-        .no-result { color: #999; }
-        .error-tip { color: #f5222d; }
+        .no-result {
+            color: #999;
+        }
+
+        .error-tip {
+            color: #f5222d;
+        }
 
         /* 分页 - 固定在页面底部 */
         .pagination {
@@ -447,13 +464,17 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
             animation: skeleton-loading 1.5s infinite;
         }
 
         @keyframes skeleton-loading {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
+            0% {
+                transform: translateX(-100%);
+            }
+            100% {
+                transform: translateX(100%);
+            }
         }
 
         .skeleton-title {
@@ -494,7 +515,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
             animation: skeleton-loading 1.5s infinite;
         }
     </style>
@@ -543,12 +564,12 @@
 
 <!-- 分页栏移到容器外，固定在底部 -->
 <div class="pagination" id="pagination">
-    <button class="page-btn" id="prev-page"> < </button>
+    <button class="page-btn" id="prev-page"> <</button>
     <span class="page-info" id="page-info"></span>
     <div class="jump-container">
         <input type="number" id="jump-input" min="1" placeholder="页码">
     </div>
-    <button class="page-btn" id="next-page"> > </button>
+    <button class="page-btn" id="next-page"> ></button>
 </div>
 
 {if condition="!$env"}
@@ -566,7 +587,8 @@
         e.preventDefault();
         return false;
     }, true);
-    console.log = console.error = console.warn = () => {};
+    console.log = console.error = console.warn = () => {
+    };
 </script>
 {/if}
 
@@ -626,7 +648,7 @@
 
     // 通用防连点函数
     function preventMultiClick(lockKey, callback) {
-        return async function(...args) {
+        return async function (...args) {
             // 如果是下载锁，特殊处理
             if (lockKey === 'download') {
                 const songId = args[0];
@@ -726,7 +748,7 @@
                 const time = minutes * 60 + seconds;
                 const text = match[3].trim();
                 if (text) {
-                    lyrics.push({ time, text });
+                    lyrics.push({time, text});
                 }
             }
         });
@@ -932,14 +954,21 @@
             const blob = await response.blob();
             const blobUrl = URL.createObjectURL(blob);
             const a = document.createElement('a');
-            a.href = blobUrl; a.download = fileName; a.style.display = 'none';
-            document.body.appendChild(a); a.click();
+            a.href = blobUrl;
+            a.download = fileName;
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            a.click();
 
             setTimeout(() => {
-                document.body.removeChild(a); URL.revokeObjectURL(blobUrl); document.body.removeChild(toast);
+                document.body.removeChild(a);
+                URL.revokeObjectURL(blobUrl);
+                document.body.removeChild(toast);
             }, 1500);
             return true;
-        } catch (error) { throw error; }
+        } catch (error) {
+            throw error;
+        }
     }
 
     // 播放信息区的下载按钮点击事件（添加防连点）
@@ -1096,7 +1125,13 @@
                 item.querySelector('.loading-icon').style.display = 'block';
 
                 try {
-                    const playResponse = await fetch(`${API_DOMAIN}/song/play/${music.id}`);
+                    const playResponse = await fetch(`${API_DOMAIN}/song/play`, {
+                        method: "POST", // 指定请求方法为POST
+                        headers: {
+                            "Content-Type": "application/json", // 表单格式请求头
+                        },
+                        body: JSON.stringify({audio_id: music.id}),
+                    });
                     if (!playResponse.ok) throw new Error(`获取播放链接失败 [${playResponse.status}]`);
                     const playData = await playResponse.json();
                     if (playData.status !== 200) throw new Error(playData.msg || '获取播放链接失败');
@@ -1165,7 +1200,7 @@
     }
 
     function renderPagination() {
-        const { currentPage, totalPages } = paginationState;
+        const {currentPage, totalPages} = paginationState;
         pagination.style.display = 'flex';
         pageInfo.textContent = `第 ${currentPage} 页 / 共 ${totalPages} 页`;
         prevPageBtn.disabled = currentPage <= 1;

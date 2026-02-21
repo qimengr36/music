@@ -40,12 +40,15 @@ class SongServices extends BaseServices
                 'lists'    => $array,
             ] = $arr;
             if ($array) {
+                $public_key = file_get_contents('openssl/public_key');
                 foreach ($array as $val) {
+                    $song_id = $val['EMixSongID'];
+                    $song_id = openssl_encrypts($public_key, $song_id);
                     $lists[] = [
                         'singer_name' => $val['SingerName'],
                         'album_name'  => $val['AlbumName'],
                         'file_name'   => $val['FileName'],
-                        'song_id'     => $val['EMixSongID'],
+                        'song_id'     => $song_id,
                     ];
                 }
             }
@@ -57,6 +60,8 @@ class SongServices extends BaseServices
 
     public function playSongInfo($audio_id)
     {
+        $private_key = file_get_contents('openssl/private_key');
+        $audio_id = openssl_decrypts($private_key, $audio_id);
         $params = array_merge($this->commonParams(), $this->playSongInfoParams($audio_id));
         $params = $this->setSign($params);
         $url = 'https://wwwapi.kugou.com/play/songinfo?'.http_build_query($params);

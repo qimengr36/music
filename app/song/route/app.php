@@ -15,4 +15,4 @@ Route::miss(function () {
 });
 
 Route::get('search/:keyword', 'api/searchSong');
-Route::get('play/:audio_id', 'api/playSongInfo');
+Route::post('play', 'api/playSongInfo');

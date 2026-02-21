@@ -22,8 +22,9 @@ class Api extends AuthController
     }
 
     //播放歌曲
-    public function playSongInfo($audio_id)
+    public function playSongInfo()
     {
+        $audio_id = $this->request->post('audio_id', '');
         $list = $this->services->playSongInfo($audio_id);
         return app('json')->success($list);
     }
