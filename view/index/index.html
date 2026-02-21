@@ -191,6 +191,41 @@
             pointer-events: none;
         }
 
+        /* 歌词容器样式 - 新增 */
+        .lyrics-container {
+            display: none; /* 默认隐藏，播放时显示 */
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            max-height: 120px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .lyrics-container.active {
+            display: block;
+        }
+
+        .lyrics-content {
+            transition: transform 0.3s ease;
+            text-align: center;
+        }
+
+        .lyric-line {
+            font-size: 14px;
+            color: #666;
+            line-height: 24px;
+            margin: 4px 0;
+            transition: all 0.3s;
+        }
+
+        .lyric-line.active {
+            color: #1677ff;
+            font-weight: 500;
+            font-size: 16px;
+        }
+
         /* 播放器在歌曲信息下方 */
         .player-area {
             width: 100%;
@@ -479,6 +514,14 @@
                 ⬇
             </div>
         </div>
+
+        <!-- 新增：歌词显示区域 -->
+        <div class="lyrics-container" id="lyrics-container">
+            <div class="lyrics-content" id="lyrics-content">
+                <div class="lyric-line" data-time="0">暂无歌词</div>
+            </div>
+        </div>
+
         <div class="player-area">
             <audio id="audio-player" controls controlsList="nodownload" disablepictureinpicture>
         </div>
@@ -539,6 +582,12 @@
     const playingTitle = document.getElementById('playing-title');
     const playingSinger = document.getElementById('playing-singer');
     const playingDownload = document.getElementById('playing-download');
+
+    // 歌词相关元素 - 新增
+    const lyricsContainer = document.getElementById('lyrics-container');
+    const lyricsContent = document.getElementById('lyrics-content');
+    // 存储当前歌词数据 - 新增
+    let currentLyrics = [];
 
     const API_DOMAIN = `{$domain}`;
 
@@ -653,6 +702,84 @@
         resultList.appendChild(skeletonContainer);
     }
 
+    // ========== 歌词相关函数 - 新增 ==========
+    // 解析LRC歌词
+    function parseLyrics(lrcText) {
+        const lines = lrcText.split('\n');
+        const lyrics = [];
+        const timeRegex = /\[(\d{2}):(\d{2}\.\d{2})\](.*)/;
+
+        lines.forEach(line => {
+            const match = line.match(timeRegex);
+            if (match) {
+                const minutes = parseInt(match[1], 10);
+                const seconds = parseFloat(match[2]);
+                const time = minutes * 60 + seconds;
+                const text = match[3].trim();
+                if (text) {
+                    lyrics.push({ time, text });
+                }
+            }
+        });
+
+        // 按时间排序
+        return lyrics.sort((a, b) => a.time - b.time);
+    }
+
+    // 渲染歌词
+    function renderLyrics(lyrics) {
+        if (!lyrics || lyrics.length === 0) {
+            lyricsContent.innerHTML = '<div class="lyric-line">暂无歌词</div>';
+            lyricsContainer.classList.remove('active');
+            return;
+        }
+
+        lyricsContent.innerHTML = '';
+        lyrics.forEach(lyric => {
+            const line = document.createElement('div');
+            line.className = 'lyric-line';
+            line.dataset.time = lyric.time;
+            line.textContent = lyric.text;
+            lyricsContent.appendChild(line);
+        });
+
+        lyricsContainer.classList.add('active');
+    }
+
+    // 同步歌词高亮
+    function syncLyrics(currentTime) {
+        const lines = document.querySelectorAll('.lyric-line');
+        if (!lines.length) return;
+
+        let activeLine = null;
+        for (let i = 0; i < lines.length; i++) {
+            const lineTime = parseFloat(lines[i].dataset.time);
+            if (lineTime <= currentTime) {
+                activeLine = lines[i];
+            } else {
+                break;
+            }
+        }
+
+        if (activeLine) {
+            lines.forEach(line => line.classList.remove('active'));
+            activeLine.classList.add('active');
+
+            // 滚动歌词到可视区域
+            const containerHeight = lyricsContainer.offsetHeight;
+            const lineOffsetTop = activeLine.offsetTop;
+            const lineHeight = activeLine.offsetHeight;
+            lyricsContent.style.transform = `translateY(-${lineOffsetTop - containerHeight / 2 + lineHeight / 2}px)`;
+        }
+    }
+
+    // 清空歌词
+    function clearLyrics() {
+        lyricsContent.innerHTML = '<div class="lyric-line">暂无歌词</div>';
+        lyricsContainer.classList.remove('active');
+        currentLyrics = [];
+    }
+
     // ========== 事件绑定（添加防连点） ==========
     // 搜索
     searchBtn.addEventListener('click', preventMultiClick('search', async () => {
@@ -729,6 +856,18 @@
         if (e.key === 'Enter') autoJumpWithLock();
     });
 
+    // 监听音频播放进度，同步歌词 - 新增
+    audioPlayer.addEventListener('timeupdate', () => {
+        if (currentLyrics.length > 0) {
+            syncLyrics(audioPlayer.currentTime);
+        }
+    });
+
+    // 音频结束时重置歌词 - 新增
+    audioPlayer.addEventListener('ended', () => {
+        syncLyrics(0);
+    });
+
     // 清空播放信息
     function clearPlayingInfo() {
         playingInfo.classList.remove('active');
@@ -742,6 +881,8 @@
             singer: '',
             playUrl: ''
         };
+        // 清空歌词 - 新增
+        clearLyrics();
     }
 
     // 更新播放信息
@@ -760,7 +901,7 @@
 
     // 文件名处理
     function normalizeFileName(rawName, fallbackTitle = '', fallbackSinger = '') {
-        const illegalChars = /[\/:*?"<>|\\\n\r\t]/g;
+        const illegalChars = /[\\/:*?\"<>|\\\\\\n\\r\\t]/g;
         let cleanName = (rawName || '').replace(illegalChars, '-').replace(/^[- ]+|[- ]+$/g, '');
         if (!cleanName || cleanName === '-') cleanName = `${fallbackTitle || '未知歌曲'}-${fallbackSinger || '未知歌手'}`;
         if (cleanName.length > 50) cleanName = cleanName.substring(0, 50) + '...';
@@ -951,13 +1092,20 @@
                     const playData = await playResponse.json();
                     if (playData.status !== 200) throw new Error(playData.msg || '获取播放链接失败');
                     const musicUrl = playData.data?.play_url || '';
+                    const lrcText = playData.data?.lyrics || ''; // 获取歌词文本 - 新增
                     if (!musicUrl) throw new Error('未获取到有效的播放链接');
+
+                    // 解析并渲染歌词 - 新增
+                    currentLyrics = parseLyrics(lrcText);
+                    renderLyrics(currentLyrics);
+
                     audioPlayer.src = musicUrl;
                     // 更新播放信息（保存播放链接）
                     updatePlayingInfo(music.id, music.title, music.singer, musicUrl);
                     await audioPlayer.play();
                 } catch (err) {
                     alert(`播放${music.title}失败：${err.message}`);
+                    clearLyrics(); // 播放失败时清空歌词 - 新增
                 } finally {
                     item.classList.remove('loading');
                     e.target.style.display = 'block';
