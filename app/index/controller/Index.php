@@ -16,7 +16,7 @@ class Index
         View::assign('env', $env);
         $link_two = [
             'name' => '宝藏',
-            'link' => 'link_two',
+            'link' => './link_two',
         ];
         View::assign('link_two', $link_two);
         return View::fetch();
