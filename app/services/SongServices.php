@@ -77,6 +77,7 @@ class SongServices extends BaseServices
             'audio_name'  => $arr['author_name'].'-'.$arr['song_name'],
             'play_url'    => $arr['play_url'],
             'author_name' => $arr['author_name'],
+            'lyrics'      => $arr['lyrics'],
         ];
     }
 
