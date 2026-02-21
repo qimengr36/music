@@ -40,7 +40,7 @@ class SongServices extends BaseServices
                 'lists'    => $array,
             ] = $arr;
             if ($array) {
-                $public_key = file_get_contents('openssl/public_key');
+                $public_key = file_get_contents(root_path().'runtime/openssl/public_key');
                 foreach ($array as $val) {
                     $song_id = $val['EMixSongID'];
                     $song_id = openssl_encrypts($public_key, $song_id);
@@ -60,7 +60,7 @@ class SongServices extends BaseServices
 
     public function playSongInfo($audio_id)
     {
-        $private_key = file_get_contents('openssl/private_key');
+        $private_key = file_get_contents(root_path().'runtime/openssl/private_key');
         $audio_id = openssl_decrypts($private_key, $audio_id);
         $params = array_merge($this->commonParams(), $this->playSongInfoParams($audio_id));
         $params = $this->setSign($params);
